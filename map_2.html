@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>世界地圖記憶遊戲</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        /* 樣式保持不變 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        .start-screen, .game-screen {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        .start-screen h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .start-screen p {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 20px; 
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.1em;
+            color: #444;
+        }
+
+        .input-group input {
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            width: 100px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        .score-display {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            font-size: 1.5em;
+        }
+        
+        .score-display .score {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 2em;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .game-screen {
+            padding: 20px;
+        }
+        
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .game-info {
+            display: flex;
+            gap: 30px;
+            font-size: 1.1em;
+        }
+        
+        .game-info span {
+            color: #666;
+        }
+        
+        .game-info strong {
+            color: #667eea;
+            margin-left: 5px;
+        }
+        
+        #map {
+            width: 100%;
+            height: 500px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .question-text {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 10px;
+            border-left: 5px solid #ffc107;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .option-btn {
+            padding: 20px;
+            font-size: 1.1em;
+            border: 3px solid #e0e0e0;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .option-btn:hover:not(:disabled) {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-2px);
+        }
+        
+        .option-btn.correct {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .option-btn.wrong {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .next-btn {
+            background: #28a745;
+            margin-top: 10px;
+        }
+        
+        .next-btn:hover {
+            background: #218838;
+        }
+        
+        .reset-btn {
+            background: #6c757d;
+            padding: 10px 20px;
+            font-size: 0.9em;
+        }
+        
+        .reset-btn:hover {
+            background: #5a6268;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .leaflet-container {
+            background: #aad3df;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .start-screen, .game-screen {
+                padding: 20px;
+            }
+            
+            .start-screen h1 {
+                font-size: 1.8em;
+            }
+            
+            #map {
+                height: 350px;
+            }
+            
+            .options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="startScreen" class="start-screen">
+            <h1>🌍 世界地圖記憶遊戲</h1>
+            <p>測試你對世界各國的認識！</p>
+            <p style="font-size: 1em; color: #888;">涵蓋所有主要國家、微型國家和爭議地區</p>
+
+            <div class="input-group">
+                <label for="questionCount">遊戲題數：</label>
+                <input type="number" id="questionCount" value="20" min="5" max="200">
+            </div>
+
+            <div id="finalScore" class="score-display hidden">
+                <div>遊戲結束！</div>
+                <div class="score" id="finalScoreText"></div>
+                <div id="accuracyText"></div>
+            </div>
+            <button class="btn" onclick="startGame()">開始遊戲</button>
+            <div id="loadingMsg" class="loading hidden">載入高解析度地圖資料中... (約 14.5MB，可能需數秒)</div>
+        </div>
+        
+        <div id="gameScreen" class="game-screen hidden">
+            <div class="game-header">
+                <div class="game-info">
+                    <div>
+                        <span>題目:</span>
+                        <strong id="questionNum">1 / 100</strong>
+                    </div>
+                    <div>
+                        <span>答對:</span>
+                        <strong id="scoreNum">0</strong>
+                    </div>
+                </div>
+                <button class="btn reset-btn" onclick="resetGame()">重新開始</button>
+            </div>
+            
+            <div id="map"></div>
+            
+            <div class="question-text">
+                請選擇地圖上紅色高亮顯示的國家名稱 ⬆️
+            </div>
+            
+            <div class="options" id="options"></div>
+            
+            <button id="nextBtn" class="btn next-btn hidden" onclick="nextQuestion()">下一題 →</button>
+        </div>
+    </div>
+
+    <script>
+        // GeoJSON URL 已經替換為您測試過的、包含小國的高解析度數據源
+        const GEO_JSON_URL = 'https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson';
+
+        // 修正後的國家列表：包含所有微型國家和島國，並已修正 GeoJSON 匹配名稱
+        var countries = [
+            // 亞洲
+            { name: '中華人民共和國', nameEn: 'China', zoom: 4 },
+            { name: '台灣', nameEn: 'Taiwan', zoom: 7 }, // 爭議地區
+            { name: '日本', nameEn: 'Japan', zoom: 5 },
+            { name: '印度', nameEn: 'India', zoom: 5 },
+            { name: '泰國', nameEn: 'Thailand', zoom: 6 },
+            { name: '越南', nameEn: 'Vietnam', zoom: 6 },
+            { name: '南韓', nameEn: 'South Korea', zoom: 7 },
+            { name: '印尼', nameEn: 'Indonesia', zoom: 5 },
+            { name: '馬來西亞', nameEn: 'Malaysia', zoom: 6 },
+            { name: '菲律賓', nameEn: 'Philippines', zoom: 6 },
+            { name: '巴基斯坦', nameEn: 'Pakistan', zoom: 5 },
+            { name: '孟加拉', nameEn: 'Bangladesh', zoom: 7 },
+            { name: '哈薩克', nameEn: 'Kazakhstan', zoom: 5 },
+            { name: '烏茲別克', nameEn: 'Uzbekistan', zoom: 6 },
+            { name: '土庫曼', nameEn: 'Turkmenistan', zoom: 6 },
+            { name: '塔吉克', nameEn: 'Tajikistan', zoom: 7 },
+            { name: '吉爾吉斯', nameEn: 'Kyrgyzstan', zoom: 7 },
+            { name: '阿富汗', nameEn: 'Afghanistan', zoom: 6 },
+            { name: '尼泊爾', nameEn: 'Nepal', zoom: 7 },
+            { name: '不丹', nameEn: 'Bhutan', zoom: 8 },
+            { name: '斯里蘭卡', nameEn: 'Sri Lanka', zoom: 7 },
+            { name: '緬甸', nameEn: 'Myanmar', zoom: 6 },
+            { name: '寮國', nameEn: 'Laos', zoom: 7 },
+            { name: '柬埔寨', nameEn: 'Cambodia', zoom: 7 },
+            { name: '新加坡', nameEn: 'Singapore', zoom: 11 }, // 新 GeoJSON 應可匹配
+            { name: '汶萊', nameEn: 'Brunei', zoom: 9 },
+            { name: '東帝汶', nameEn: 'East Timor', zoom: 9 },
+            { name: '蒙古', nameEn: 'Mongolia', zoom: 5 },
+            { name: '北韓', nameEn: 'North Korea', zoom: 7 },
+            { name: '馬爾地夫', nameEn: 'Maldives', zoom: 9 }, // 新 GeoJSON 應可匹配
+            { name: '塞席爾', nameEn: 'Seychelles', zoom: 9 }, // 新 GeoJSON 應可匹配
+            { name: '喬治亞', nameEn: 'Georgia', zoom: 7 },
+            { name: '亞美尼亞', nameEn: 'Armenia', zoom: 8 },
+            { name: '亞塞拜然', nameEn: 'Azerbaijan', zoom: 7 },
+
+
+            // 中東
+            { name: '沙烏地阿拉伯', nameEn: 'Saudi Arabia', zoom: 5 },
+            { name: '土耳其', nameEn: 'Turkey', zoom: 6 },
+            { name: '伊朗', nameEn: 'Iran', zoom: 5 },
+            { name: '伊拉克', nameEn: 'Iraq', zoom: 6 },
+            { name: '敘利亞', nameEn: 'Syria', zoom: 7 },
+            { name: '約旦', nameEn: 'Jordan', zoom: 7 },
+            { name: '黎巴嫩', nameEn: 'Lebanon', zoom: 8 },
+            { name: '以色列', nameEn: 'Israel', zoom: 8 },
+            { name: '巴勒斯坦', nameEn: 'Palestine', zoom: 9, altNames: ['West Bank', 'Gaza Strip'] }, 
+            { name: '葉門', nameEn: 'Yemen', zoom: 6 },
+            { name: '阿曼', nameEn: 'Oman', zoom: 6 },
+            { name: '阿拉伯聯合大公國', nameEn: 'United Arab Emirates', zoom: 7 },
+            { name: '卡達', nameEn: 'Qatar', zoom: 8 },
+            { name: '科威特', nameEn: 'Kuwait', zoom: 8 },
+            { name: '巴林', nameEn: 'Bahrain', zoom: 9 }, // 新 GeoJSON 應可匹配
+
+            // 歐洲
+            { name: '俄羅斯', nameEn: 'Russia', zoom: 3 },
+            { name: '英國', nameEn: 'United Kingdom', zoom: 6 },
+            { name: '法國', nameEn: 'France', zoom: 6 },
+            { name: '德國', nameEn: 'Germany', zoom: 6 },
+            { name: '義大利', nameEn: 'Italy', zoom: 6 },
+            { name: '西班牙', nameEn: 'Spain', zoom: 6 },
+            { name: '波蘭', nameEn: 'Poland', zoom: 6 },
+            { name: '羅馬尼亞', nameEn: 'Romania', zoom: 6 },
+            { name: '荷蘭', nameEn: 'Netherlands', zoom: 7 },
+            { name: '比利時', nameEn: 'Belgium', zoom: 8 },
+            { name: '希臘', nameEn: 'Greece', zoom: 6 },
+            { name: '葡萄牙', nameEn: 'Portugal', zoom: 7 },
+            { name: '捷克', nameEn: 'Czech Republic', zoom: 7, altNames: ['Czechia'] }, // 修正：加入 'Czechia' 備用名
+            { name: '匈牙利', nameEn: 'Hungary', zoom: 7 },
+            { name: '瑞典', nameEn: 'Sweden', zoom: 5 },
+            { name: '奧地利', nameEn: 'Austria', zoom: 7 },
+            { name: '白俄羅斯', nameEn: 'Belarus', zoom: 6 },
+            { name: '保加利亞', nameEn: 'Bulgaria', zoom: 7 },
+            { name: '塞爾維亞', nameEn: 'Serbia', zoom: 7, altNames: ['Republic of Serbia'] },
+            { name: '瑞士', nameEn: 'Switzerland', zoom: 8 },
+            { name: '丹麥', nameEn: 'Denmark', zoom: 7 },
+            { name: '斯洛伐克', nameEn: 'Slovakia', zoom: 7 },
+            { name: '芬蘭', nameEn: 'Finland', zoom: 5 },
+            { name: '挪威', nameEn: 'Norway', zoom: 5 },
+            { name: '愛爾蘭', nameEn: 'Ireland', zoom: 7 },
+            { name: '克羅埃西亞', nameEn: 'Croatia', zoom: 7 },
+            { name: '波士尼亞赫塞哥維納', nameEn: 'Bosnia and Herzegovina', zoom: 7 },
+            { name: '立陶宛', nameEn: 'Lithuania', zoom: 7 },
+            { name: '斯洛維尼亞', nameEn: 'Slovenia', zoom: 8 },
+            { name: '拉脫維亞', nameEn: 'Latvia', zoom: 7 },
+            { name: '愛沙尼亞', nameEn: 'Estonia', zoom: 7 },
+            { name: '摩爾多瓦', nameEn: 'Moldova', zoom: 7 },
+            { name: '阿爾巴尼亞', nameEn: 'Albania', zoom: 7 },
+            { name: '北馬其頓', nameEn: 'North Macedonia', zoom: 8, altNames: ['Macedonia'] },
+            { name: '蒙特內哥羅', nameEn: 'Montenegro', zoom: 8 },
+            { name: '冰島', nameEn: 'Iceland', zoom: 6 },
+            { name: '賽普勒斯', nameEn: 'Cyprus', zoom: 8 },
+            { name: '烏克蘭', nameEn: 'Ukraine', zoom: 6 },
+            { name: '科索沃', nameEn: 'Kosovo', zoom: 8 }, // 爭議地區
+            { name: '馬爾他', nameEn: 'Malta', zoom: 9 }, // 新 GeoJSON 應可匹配
+            { name: '盧森堡', nameEn: 'Luxembourg', zoom: 9 },
+            { name: '梵蒂岡', nameEn: 'Vatican', zoom: 12 }, // 修正：由 'Vatican City' 改為 'Vatican'
+            { name: '安道爾', nameEn: 'Andorra', zoom: 9 }, // 新 GeoJSON 應可匹配
+            { name: '聖馬利諾', nameEn: 'San Marino', zoom: 9 }, // 新 GeoJSON 應可匹配
+            { name: '摩納哥', nameEn: 'Monaco', zoom: 10 }, // 新 GeoJSON 應可匹配
+
+            // 非洲
+            { name: '南非', nameEn: 'South Africa', zoom: 5 },
+            { name: '埃及', nameEn: 'Egypt', zoom: 6 },
+            { name: '奈及利亞', nameEn: 'Nigeria', zoom: 6 },
+            { name: '衣索比亞', nameEn: 'Ethiopia', zoom: 6 },
+            { name: '肯亞', nameEn: 'Kenya', zoom: 6 },
+            { name: '坦尚尼亞', nameEn: 'United Republic of Tanzania', zoom: 6, altNames: ['Tanzania'] }, 
+            { name: '烏干達', nameEn: 'Uganda', zoom: 7 },
+            { name: '阿爾及利亞', nameEn: 'Algeria', zoom: 5 },
+            { name: '蘇丹', nameEn: 'Sudan', zoom: 6 },
+            { name: '摩洛哥', nameEn: 'Morocco', zoom: 6 },
+            { name: '安哥拉', nameEn: 'Angola', zoom: 6 },
+            { name: '迦納', nameEn: 'Ghana', zoom: 7 },
+            { name: '莫三比克', nameEn: 'Mozambique', zoom: 6 },
+            { name: '馬達加斯加', nameEn: 'Madagascar', zoom: 6 },
+            { name: '喀麥隆', nameEn: 'Cameroon', zoom: 6 },
+            { name: '象牙海岸', nameEn: 'Côte d\'Ivoire', zoom: 7, altNames: ['Ivory Coast'] }, 
+            { name: '尼日', nameEn: 'Niger', zoom: 6 },
+            { name: '布吉納法索', nameEn: 'Burkina Faso', zoom: 7 },
+            { name: '馬利', nameEn: 'Mali', zoom: 5 },
+            { name: '馬拉威', nameEn: 'Malawi', zoom: 7 },
+            { name: '尚比亞', nameEn: 'Zambia', zoom: 6 },
+            { name: '塞內加爾', nameEn: 'Senegal', zoom: 7 },
+            { name: '索馬利亞', nameEn: 'Somalia', zoom: 6 },
+            { name: '查德', nameEn: 'Chad', zoom: 6 },
+            { name: '辛巴威', nameEn: 'Zimbabwe', zoom: 7 },
+            { name: '盧安達', nameEn: 'Rwanda', zoom: 8 },
+            { name: '貝南', nameEn: 'Benin', zoom: 7 },
+            { name: '突尼西亞', nameEn: 'Tunisia', zoom: 6 },
+            { name: '蒲隆地', nameEn: 'Burundi', zoom: 8 },
+            { name: '南蘇丹', nameEn: 'South Sudan', zoom: 6 },
+            { name: '多哥', nameEn: 'Togo', zoom: 8 },
+            { name: '獅子山', nameEn: 'Sierra Leone', zoom: 7 },
+            { name: '利比亞', nameEn: 'Libya', zoom: 5 },
+            { name: '賴比瑞亞', nameEn: 'Liberia', zoom: 7 },
+            { name: '茅利塔尼亞', nameEn: 'Mauritania', zoom: 6 },
+            { name: '中非共和國', nameEn: 'Central African Republic', zoom: 6 },
+            { name: '納米比亞', nameEn: 'Namibia', zoom: 6 },
+            { name: '波札那', nameEn: 'Botswana', zoom: 6 },
+            { name: '甘比亞', nameEn: 'Gambia', zoom: 8 },
+            { name: '加彭', nameEn: 'Gabon', zoom: 7 },
+            { name: '幾內亞', nameEn: 'Guinea', zoom: 7 },
+            { name: '赤道幾內亞', nameEn: 'Equatorial Guinea', zoom: 8 },
+            { name: '賴索托', nameEn: 'Lesotho', zoom: 8 },
+            { name: '吉布地', nameEn: 'Djibouti', zoom: 8 },
+            { name: '幾內亞比索', nameEn: 'Guinea Bissau', zoom: 8, altNames: ['Guinea-Bissau'] }, 
+            { name: '剛果 (金)', nameEn: 'Democratic Republic of the Congo', zoom: 5 }, 
+            { name: '剛果 (布)', nameEn: 'Republic of the Congo', zoom: 6 }, 
+            { name: '厄利垂亞', nameEn: 'Eritrea', zoom: 7 }, 
+            { name: '西撒哈拉', nameEn: 'Western Sahara', zoom: 7 }, // 爭議地區
+            { name: '維德角', nameEn: 'Cabo Verde', zoom: 8 }, // 修正：由 'Cape Verde' 改為 'Cabo Verde'
+            { name: '聖多美普林西比', nameEn: 'São Tomé and Principe', zoom: 8 }, // 修正：由 'São Tomé and Príncipe' 改為 'São Tomé and Principe'
+
+            // 北美洲 (已補齊重要加勒比海國家)
+            { name: '美國', nameEn: 'United States of America', zoom: 4 },
+            { name: '加拿大', nameEn: 'Canada', zoom: 4 },
+            { name: '墨西哥', nameEn: 'Mexico', zoom: 5 },
+            { name: '古巴', nameEn: 'Cuba', zoom: 6 },
+            { name: '海地', nameEn: 'Haiti', zoom: 8 },
+            { name: '多明尼加', nameEn: 'Dominican Republic', zoom: 8 },
+            { name: '牙買加', nameEn: 'Jamaica', zoom: 8 },
+            { name: '巴拿馬', nameEn: 'Panama', zoom: 8 },
+            { name: '哥斯大黎加', nameEn: 'Costa Rica', zoom: 8 },
+            { name: '尼加拉瓜', nameEn: 'Nicaragua', zoom: 7 },
+            { name: '宏都拉斯', nameEn: 'Honduras', zoom: 7 },
+            { name: '薩爾瓦多', nameEn: 'El Salvador', zoom: 8 },
+            { name: '瓜地馬拉', nameEn: 'Guatemala', zoom: 7 },
+            { name: '貝里斯', nameEn: 'Belize', zoom: 8 },
+            { name: '巴哈馬', nameEn: 'The Bahamas', zoom: 8 }, // 修正：由 'Bahamas' 改為 'The Bahamas'
+            { name: '聖克里斯多福及尼維斯', nameEn: 'Saint Kitts and Nevis', zoom: 9 },
+            { name: '安地卡及巴布達', nameEn: 'Antigua and Barbuda', zoom: 9 },
+            { name: '多米尼克', nameEn: 'Dominica', zoom: 9 },
+            { name: '聖露西亞', nameEn: 'Saint Lucia', zoom: 9 },
+            { name: '聖文森及格瑞那丁', nameEn: 'Saint Vincent and the Grenadines', zoom: 9 },
+            { name: '格瑞那達', nameEn: 'Grenada', zoom: 9 },
+            { name: '巴貝多', nameEn: 'Barbados', zoom: 9 },
+            { name: '千里達及托巴哥', nameEn: 'Trinidad and Tobago', zoom: 8 },
+
+
+            // 南美洲
+            { name: '巴西', nameEn: 'Brazil', zoom: 4 },
+            { name: '阿根廷', nameEn: 'Argentina', zoom: 5 },
+            { name: '哥倫比亞', nameEn: 'Colombia', zoom: 5 },
+            { name: '秘魯', nameEn: 'Peru', zoom: 5 },
+            { name: '委內瑞拉', nameEn: 'Venezuela', zoom: 6 },
+            { name: '智利', nameEn: 'Chile', zoom: 4 },
+            { name: '厄瓜多', nameEn: 'Ecuador', zoom: 7 },
+            { name: '玻利維亞', nameEn: 'Bolivia', zoom: 5 },
+            { name: '巴拉圭', nameEn: 'Paraguay', zoom: 6 },
+            { name: '烏拉圭', nameEn: 'Uruguay', zoom: 7 },
+            { name: '蓋亞那', nameEn: 'Guyana', zoom: 7 },
+            { name: '蘇利南', nameEn: 'Suriname', zoom: 7 },
+
+            // 大洋洲
+            { name: '澳洲', nameEn: 'Australia', zoom: 4 },
+            { name: '紐西蘭', nameEn: 'New Zealand', zoom: 6 },
+            { name: '巴布亞紐幾內亞', nameEn: 'Papua New Guinea', zoom: 6 },
+            { name: '斐濟', nameEn: 'Fiji', zoom: 7 },
+            { name: '索羅門群島', nameEn: 'Solomon Islands', zoom: 7 },
+            { name: '萬那杜', nameEn: 'Vanuatu', zoom: 7 },
+            { name: '薩摩亞', nameEn: 'Samoa', zoom: 8 }, // 新 GeoJSON 應可匹配
+            { name: '東加', nameEn: 'Tonga', zoom: 8 }, // 新 GeoJSON 應可匹配
+            { name: '密克羅尼西亞', nameEn: 'Federated States of Micronesia', zoom: 7 }, // 新 GeoJSON 應可匹配
+            { name: '帛琉', nameEn: 'Palau', zoom: 9 }, // 新 GeoJSON 應可匹配
+            { name: '馬紹爾群島', nameEn: 'Marshall Islands', zoom: 8 }, // 新 GeoJSON 應可匹配
+            { name: '吉里巴斯', nameEn: 'Kiribati', zoom: 7 }, // 新 GeoJSON 應可匹配
+            { name: '吐瓦魯', nameEn: 'Tuvalu', zoom: 9 } // 新 GeoJSON 應可匹配
+        ];
+
+        var map;
+        var geoJsonLayer;
+        var highlightLayer;
+        var allCountriesData;
+        var shuffledCountries = [];
+        var currentQuestion = 0;
+        var score = 0;
+        var answered = false;
+        var totalQuestions = 0;
+
+        function shuffle(array) {
+            var newArray = array.slice();
+            for (var i = newArray.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = newArray[i];
+                newArray[i] = newArray[j];
+                newArray[j] = temp;
+            }
+            return newArray;
+        }
+
+        // 核心：修正 GeoJSON 數據查找邏輯 (針對新的 GeoJSON 結構)
+        function findCountryFeature(countryData) {
+            
+            // 新 GeoJSON 來源可能使用的名稱字段：name、admin、ADM0_A3_IS (ISO代碼)
+            const nameFields = ['name', 'admin', 'ADM0_A3_IS']; 
+            
+            // 1. 嘗試使用主要的英文名稱匹配
+            let foundFeature = allCountriesData.features.find(function(feature) {
+                var featureName = '';
+                // 依序檢查可能的名稱欄位
+                for (const field of nameFields) {
+                    if (feature.properties[field]) {
+                        featureName = feature.properties[field];
+                        break;
+                    }
+                }
+                // 匹配主要英文名稱
+                return featureName.trim() === countryData.nameEn.trim();
+            });
+
+            // 2. 如果找不到，檢查是否有備用名稱 (altNames)
+            if (!foundFeature && countryData.altNames && countryData.altNames.length > 0) {
+                foundFeature = allCountriesData.features.find(function(feature) {
+                    var featureName = '';
+                    for (const field of nameFields) {
+                        if (feature.properties[field]) {
+                            featureName = feature.properties[field];
+                            break;
+                        }
+                    }
+                    // 匹配備用名稱 (用於捷克 'Czechia')
+                    return countryData.altNames.some(altName => featureName.trim() === altName.trim());
+                });
+            }
+            
+            // 3. 針對巴勒斯坦的特殊檢查
+            if (!foundFeature && countryData.nameEn === 'Palestine') {
+                 foundFeature = allCountriesData.features.find(function(feature) {
+                    var featureName = '';
+                    for (const field of nameFields) {
+                        if (feature.properties[field]) {
+                            featureName = feature.properties[field];
+                            break;
+                        }
+                    }
+                    // 檢查是否是 West Bank 或 Gaza Strip
+                    return featureName === 'West Bank' || featureName === 'Gaza Strip';
+                });
+            }
+            
+            return foundFeature;
+        }
+
+
+        function startGame() {
+            var inputCount = parseInt(document.getElementById('questionCount').value, 10);
+            
+            // 檢查輸入是否有效
+            const maxCount = countries.length;
+            if (isNaN(inputCount) || inputCount < 5 || inputCount > maxCount) {
+                alert('請輸入 5 到 ' + maxCount + ' 之間的有效題數！');
+                document.getElementById('questionCount').value = 20;
+                return;
+            }
+
+            totalQuestions = inputCount;
+            document.getElementById('loadingMsg').classList.remove('hidden');
+            
+            // 載入 GeoJSON 數據 (使用新的高解析度 URL)
+            fetch(GEO_JSON_URL)
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    allCountriesData = data;
+                    initGame();
+                })
+                .catch(function(error) {
+                    console.error('Error loading map data:', error);
+                    alert('無法載入高解析度地圖資料，請檢查網路連線後重試 (檔案較大，可能需穩定網路)。');
+                    document.getElementById('loadingMsg').classList.add('hidden');
+                });
+        }
+
+        function initGame() {
+            document.getElementById('loadingMsg').classList.add('hidden');
+            
+            // 根據使用者輸入的題數隨機選取國家
+            shuffledCountries = shuffle(countries).slice(0, totalQuestions);
+            
+            currentQuestion = 0;
+            score = 0;
+            
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            
+            if (!map) {
+                map = L.map('map', {
+                    zoomControl: true,
+                    attributionControl: false,
+                    maxBounds: [[-90, -180], [90, 180]]
+                }).setView([20, 0], 2);
+                
+                // 基礎國家輪廓圖層
+                geoJsonLayer = L.geoJSON(allCountriesData, {
+                    style: function() {
+                        return {
+                            fillColor: '#95a5a6',
+                            weight: 1,
+                            opacity: 1,
+                            color: '#34495e',
+                            fillOpacity: 0.7
+                        };
+                    }
+                }).addTo(map);
+            } else {
+                map.setView([20, 0], 2);
+            }
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestion >= totalQuestions) {
+                endGame();
+                return;
+            }
+
+            answered = false;
+            document.getElementById('nextBtn').classList.add('hidden');
+            
+            var correct = shuffledCountries[currentQuestion];
+            
+            if (highlightLayer) {
+                map.removeLayer(highlightLayer);
+            }
+            
+            // 使用更強大的查找函數
+            var countryFeature = findCountryFeature(correct);
+            
+            if (countryFeature) {
+                highlightLayer = L.geoJSON(countryFeature, {
+                    style: {
+                        fillColor: '#e74c3c',
+                        weight: 3,
+                        opacity: 1,
+                        color: '#c0392b',
+                        fillOpacity: 0.8
+                    }
+                }).addTo(map);
+                
+                var bounds = highlightLayer.getBounds();
+                map.fitBounds(bounds, {
+                    padding: [50, 50],
+                    maxZoom: correct.zoom,
+                    animate: true,
+                    duration: 1
+                });
+                console.log('成功顯示國家:', correct.name);
+
+            } else {
+                // 如果 GeoJSON 名稱修正後仍有極少數國家找不到，我們跳過並記錄
+                console.error('【嚴重錯誤】新的 GeoJSON 找不到國家:', correct.name, '(', correct.nameEn, ') - 跳過此題');
+                currentQuestion++;
+                loadQuestion();
+                return;
+            }
+            
+            // 生成選項：從所有國家中隨機選取 3 個錯誤答案
+            var wrongOptions = shuffle(countries.filter(function(c) {
+                return c.nameEn !== correct.nameEn;
+            })).slice(0, 3);
+            var allOptions = shuffle([correct].concat(wrongOptions));
+            
+            var optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            allOptions.forEach(function(option) {
+                var btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option.name;
+                btn.onclick = function() {
+                    handleAnswer(option, correct);
+                };
+                optionsContainer.appendChild(btn);
+            });
+            
+            document.getElementById('questionNum').textContent = (currentQuestion + 1) + ' / ' + totalQuestions;
+            document.getElementById('scoreNum').textContent = score;
+        }
+
+        function handleAnswer(selected, correct) {
+            if (answered) return;
+            answered = true;
+            
+            var buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(function(btn) {
+                btn.disabled = true;
+                if (btn.textContent === correct.name) {
+                    btn.classList.add('correct');
+                } else if (btn.textContent === selected.name) {
+                    btn.classList.add('wrong');
+                }
+            });
+            
+            if (selected.nameEn === correct.nameEn) {
+                score++;
+                document.getElementById('scoreNum').textContent = score;
+            }
+            
+            document.getElementById('nextBtn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            loadQuestion();
+        }
+
+        function endGame() {
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+            
+            var accuracy = Math.round((score / totalQuestions) * 100);
+            document.getElementById('finalScore').classList.remove('hidden');
+            document.getElementById('finalScoreText').textContent = score + ' / ' + totalQuestions;
+            document.getElementById('accuracyText').textContent = '正確率: ' + accuracy + '%';
+
+            // 重設輸入框為上次的值
+            document.getElementById('questionCount').value = totalQuestions;
+        }
+
+        function resetGame() {
+            if (confirm('確定要重新開始嗎？')) {
+                document.getElementById('gameScreen').classList.add('hidden');
+                document.getElementById('startScreen').classList.remove('hidden');
+                document.getElementById('finalScore').classList.add('hidden');
+                if (highlightLayer) {
+                    map.removeLayer(highlightLayer);
+                }
+                if (map) {
+                    map.setView([20, 0], 2);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
