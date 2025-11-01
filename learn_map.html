@@ -140,6 +140,18 @@
             margin-bottom: 2px;
         }
 
+        .extra-info-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #667eea;
+        }
+
+        .extra-info-section h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
         .hidden {
             display: none !important;
         }
@@ -200,6 +212,7 @@
         const GEO_JSON_URL = 'https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson';
         const FLAG_URL_BASE = 'https://flagcdn.com/256x192/'; // 國旗服務
         
+        // 國家基本資料 (範例)
         var countries = [
         // 非洲 (Africa)
         { name: '阿富汗', nameEn: 'Afghanistan', nameFull: '阿富汗伊斯蘭酋長國', nameEnFull: 'Islamic Emirate of Afghanistan', nameNative: 'د افغانستان اسلامي امارت', iso2: 'af', capital: '喀布爾', zoom: 6, regions: ['Asia', 'SouthAsia', 'IslamicWorld', 'Worldwide'] },
@@ -455,6 +468,982 @@
         { name: '蒙特內哥羅', nameEn: 'Montenegro', nameFull: '蒙特內哥羅', nameEnFull: 'Montenegro', nameNative: 'Црна Гора', iso2: 'me', capital: '波德戈里察', zoom: 8, regions: ['Europe', 'Worldwide'] },
     ];
 
+        // 額外國家資訊
+        var extraCountryInfo = {
+            'China': {
+                population: '約 14.25 億',
+                religion: '官方無特定宗教，主要為佛教、道教、民間信仰',
+                language: '普通話 (官方語)、多種方言',
+                currency: '人民幣 (CNY)'
+            },
+            'United States of America': {
+                population: '約 3.37 億',
+                religion: '基督教 (新教、天主教)',
+                language: '英語 (實際無官方語言)',
+                currency: '美元 (USD)'
+            },
+            'Japan': {
+                population: '約 1.22 億',
+                religion: '神道教、佛教',
+                language: '日語',
+                currency: '日圓 (JPY)'
+            },
+            'India': {
+                population: '約 14.5 億',
+                religion: '印度教 (主體)、伊斯蘭教',
+                language: '印地語、英語 (官方語) 及數百種地區語言',
+                currency: '印度盧比 (INR)'
+            },
+            'Brazil': {
+                population: '約 2.19 億',
+                religion: '天主教、新教',
+                language: '葡萄牙語',
+                currency: '巴西雷亞爾 (BRL)'
+            },
+            'Russian Federation': {
+                population: '約 1.44 億',
+                religion: '東正教、伊斯蘭教',
+                language: '俄語',
+                currency: '俄羅斯盧布 (RUB)'
+            },
+            'Canada': {
+                population: '約 4,100 萬',
+                religion: '基督教 (天主教、新教)',
+                language: '英語、法語 (官方語)',
+                currency: '加拿大元 (CAD)'
+            },
+            'Australia': {
+                population: '約 2,750 萬',
+                religion: '基督教 (主體)、無宗教信仰',
+                language: '英語',
+                currency: '澳洲元 (AUD)'
+            },
+            'United Kingdom of Great Britain and Northern Ireland': {
+                population: '約 6,800 萬',
+                religion: '基督教 (英格蘭教會)、無宗教信仰',
+                language: '英語',
+                currency: '英鎊 (GBP)'
+            },
+            'France': {
+                population: '約 6,500 萬',
+                religion: '天主教 (傳統主體)、無宗教信仰',
+                language: '法語',
+                currency: '歐元 (EUR)'
+            },
+            'Germany': {
+                population: '約 8,450 萬',
+                religion: '基督教 (新教、天主教)',
+                language: '德語',
+                currency: '歐元 (EUR)'
+            },
+            'Italy': {
+                population: '約 5,850 萬',
+                religion: '天主教',
+                language: '義大利語',
+                currency: '歐元 (EUR)'
+            },
+            'Spain': {
+                population: '約 4,750 萬',
+                religion: '天主教',
+                language: '西班牙語 (卡斯提亞語)、多種地區語言',
+                currency: '歐元 (EUR)'
+            },
+            'Mexico': {
+                population: '約 1.3 億',
+                religion: '天主教',
+                language: '西班牙語',
+                currency: '墨西哥比索 (MXN)'
+            },
+            'Argentina': {
+                population: '約 4,700 萬',
+                religion: '天主教',
+                language: '西班牙語',
+                currency: '阿根廷比索 (ARS)'
+            },
+            'South Africa': {
+                population: '約 6,300 萬',
+                religion: '基督教 (主體)',
+                language: '祖魯語、科薩語、南非荷蘭語等 11 種官方語言',
+                currency: '南非蘭特 (ZAR)'
+            },
+            'Egypt': {
+                population: '約 1.15 億',
+                religion: '伊斯蘭教 (遜尼派)',
+                language: '阿拉伯語',
+                currency: '埃及鎊 (EGP)'
+            },
+            'Saudi Arabia': {
+                population: '約 3,750 萬',
+                religion: '伊斯蘭教 (瓦哈比派)',
+                language: '阿拉伯語',
+                currency: '沙特里亞爾 (SAR)'
+            },
+            'Turkey': {
+                population: '約 8,650 萬',
+                religion: '伊斯蘭教 (遜尼派)',
+                language: '土耳其語',
+                currency: '土耳其里拉 (TRY)'
+            },
+            'Iran': {
+                population: '約 9,000 萬',
+                religion: '伊斯蘭教 (什葉派)',
+                language: '波斯語',
+                currency: '伊朗里亞爾 (IRR)'
+            },
+            'Thailand': {
+                population: '約 7,150 萬',
+                religion: '佛教 (上座部佛教)',
+                language: '泰語',
+                currency: '泰銖 (THB)'
+            },
+            'Vietnam': {
+                population: '約 1.0 億',
+                religion: '佛教、民間信仰、無宗教信仰',
+                language: '越南語',
+                currency: '越南盾 (VND)'
+            },
+            'South Korea': {
+                population: '約 5,170 萬',
+                religion: '無宗教信仰、基督教、佛教',
+                language: '韓語',
+                currency: '韓圓 (KRW)'
+            },
+            'Indonesia': {
+                population: '約 2.8 億',
+                religion: '伊斯蘭教 (主體)',
+                language: '印尼語',
+                currency: '印尼盾 (IDR)'
+            },
+            'Malaysia': {
+                population: '約 3,450 萬',
+                religion: '伊斯蘭教 (官方宗教)',
+                language: '馬來語 (官方語)、英語、華語',
+                currency: '馬來西亞令吉 (MYR)'
+            },
+            'Philippines': {
+                population: '約 1.18 億',
+                religion: '天主教',
+                language: '菲律賓語 (塔加祿語)、英語',
+                currency: '菲律賓比索 (PHP)'
+            },
+            'Pakistan': {
+                population: '約 2.5 億',
+                religion: '伊斯蘭教',
+                language: '烏爾都語、英語 (官方語)',
+                currency: '巴基斯坦盧比 (PKR)'
+            },
+            'Bangladesh': {
+                population: '約 1.76 億',
+                religion: '伊斯蘭教',
+                language: '孟加拉語',
+                currency: '孟加拉塔卡 (BDT)'
+            },
+            'Nigeria': {
+                population: '約 2.37 億',
+                religion: '基督教、伊斯蘭教',
+                language: '英語 (官方語)、豪薩語、伊博語、約魯巴語',
+                currency: '奈拉 (NGN)'
+            },
+            'Ethiopia': {
+                population: '約 1.3 億',
+                religion: '衣索比亞正教、伊斯蘭教',
+                language: '阿姆哈拉語 (工作語言)',
+                currency: '衣索比亞比爾 (ETB)'
+            },
+            'Kenya': {
+                population: '約 5,750 萬',
+                religion: '基督教 (主體)',
+                language: '斯瓦希里語、英語 (官方語)',
+                currency: '肯亞先令 (KES)'
+            },
+            'Tanzania': {
+                population: '約 7,000 萬',
+                religion: '基督教、伊斯蘭教',
+                language: '斯瓦希里語、英語',
+                currency: '坦尚尼亞先令 (TZS)'
+            },
+            'Uganda': {
+                population: '約 5,100 萬',
+                religion: '基督教 (主體)',
+                language: '英語、斯瓦希里語',
+                currency: '烏干達先令 (UGX)'
+            },
+            'Algeria': {
+                population: '約 4,750 萬',
+                religion: '伊斯蘭教 (遜尼派)',
+                language: '阿拉伯語、柏柏爾語 (官方語)',
+                currency: '阿爾及利亞第納爾 (DZD)'
+            },
+            'Sudan': {
+                population: '約 4,950 萬',
+                religion: '伊斯蘭教 (遜尼派)',
+                language: '阿拉伯語、英語 (官方語)',
+                currency: '蘇丹鎊 (SDG)'
+            },
+            'Morocco': {
+                population: '約 3,850 萬',
+                religion: '伊斯蘭教 (遜尼派)',
+                language: '阿拉伯語、柏柏爾語 (官方語)',
+                currency: '摩洛哥迪拉姆 (MAD)'
+            },
+            'Angola': {
+                population: '約 3,850 萬',
+                religion: '基督教 (主體)',
+                language: '葡萄牙語 (官方語)',
+                currency: '安哥拉寬扎 (AOA)'
+            },
+            'Ghana': {
+                population: '約 3,450 萬',
+                religion: '基督教 (主體)',
+                language: '英語 (官方語)',
+                currency: '迦納塞地 (GHS)'
+            },
+            'Mozambique': {
+                population: '約 3,650 萬',
+                religion: '基督教、伊斯蘭教',
+                language: '葡萄牙語 (官方語)',
+                currency: '莫三比克梅蒂卡爾 (MZN)'
+            },
+            'Madagascar': {
+                population: '約 3,100 萬',
+                religion: '傳統信仰、基督教',
+                language: '馬拉加斯語、法語',
+                currency: '馬達加斯加阿里亞里 (MGA)'
+            },
+            'Cameroon': {
+                population: '約 3,000 萬',
+                religion: '基督教、伊斯蘭教',
+                language: '英語、法語 (官方語)',
+                currency: '中非金融合作法郎 (XAF)'
+            },
+            'Ivory Coast': {
+                population: '約 3,050 萬',
+                religion: '伊斯蘭教、基督教',
+                language: '法語 (官方語)',
+                currency: '西非金融合作法郎 (XOF)'
+            },
+            'Niger': {
+                population: '約 2,900 萬',
+                religion: '伊斯蘭教 (主體)',
+                language: '法語 (官方語)',
+                currency: '西非金融合作法郎 (XOF)'
+            },
+            'Burkina Faso': {
+                population: '約 2,450 萬',
+                religion: '伊斯蘭教、傳統信仰',
+                language: '法語 (官方語)',
+                currency: '西非金融合作法郎 (XOF)'
+            },
+            'Mali': {
+                population: '約 2,400 萬',
+                religion: '伊斯蘭教 (主體)',
+                language: '法語 (工作語言)',
+                currency: '西非金融合作法郎 (XOF)'
+            },
+            'Malawi': {
+                population: '約 2,200 萬',
+                religion: '基督教 (主體)',
+                language: '英語、奇切瓦語 (官方語)',
+                currency: '馬拉維克瓦查 (MWK)'
+            },
+            'Zambia': {
+                population: '約 2,150 萬',
+                religion: '基督教 (主體)',
+                language: '英語 (官方語)',
+                currency: '尚比亞克瓦查 (ZMW)'
+            },
+            'Senegal': {
+                population: '約 1,900 萬',
+                religion: '伊斯蘭教 (主體)',
+                language: '法語 (官方語)',
+                currency: '西非金融合作法郎 (XOF)'
+            },
+            'Somalia': {
+                population: '約 1,850 萬',
+                religion: '伊斯蘭教 (遜尼派)',
+                language: '索馬利亞語、阿拉伯語',
+                currency: '索馬利亞先令 (SOS)'
+            },
+            'Chad': {
+                population: '約 1,850 萬',
+                religion: '伊斯蘭教、基督教',
+                language: '法語、阿拉伯語 (官方語)',
+                currency: '中非金融合作法郎 (XAF)'
+            },
+            'Zimbabwe': {
+                population: '約 1,750 萬',
+                religion: '基督教、傳統信仰',
+                language: '英語、紹納語、恩德貝勒語等 16 種官方語言',
+                currency: '尚比亞克瓦查 (ZWL) 及多種外幣',
+            },
+            'Rwanda': {
+                population: '約 1,450 萬',
+                religion: '基督教 (主體)',
+                language: '盧安達語、英語、法語、斯瓦希里語 (官方語)',
+                currency: '盧安達法郎 (RWF)'
+            },
+            'Benin': {
+                population: '約 1,400 萬',
+                religion: '基督教、伊斯蘭教、巫毒教',
+                language: '法語 (官方語)',
+                currency: '西非金融合作法郎 (XOF)'
+            },
+            'Tunisia': {
+                population: '約 1,250 萬',
+                religion: '伊斯蘭教 (遜尼派)',
+                language: '阿拉伯語 (官方語)',
+                currency: '突尼西亞第納爾 (TND)'
+            },
+            'Burundi': {
+                population: '約 1,350 萬',
+                religion: '基督教 (主體)',
+                language: '基隆迪語、法語、英語 (官方語)',
+                currency: '蒲隆地法郎 (BIF)'
+            },
+            'South Sudan': {
+                population: '約 1,150 萬',
+                religion: '基督教、傳統信仰',
+                language: '英語 (官方語)',
+                currency: '南蘇丹鎊 (SSP)'
+            },
+            'Togo': {
+                population: '約 950 萬',
+                religion: '基督教、伊斯蘭教',
+                language: '法語 (官方語)',
+                currency: '西非金融合作法郎 (XOF)'
+            },
+            'Sierra Leone': {
+                population: '約 900 萬',
+                religion: '伊斯蘭教、基督教',
+                language: '英語 (官方語)',
+                currency: '獅子山利昂 (SLL)'
+            },
+            'Libya': {
+                population: '約 750 萬',
+                religion: '伊斯蘭教 (遜尼派)',
+                language: '阿拉伯語 (官方語)',
+                currency: '利比亞第納爾 (LYD)'
+            },
+            'Liberia': {
+                population: '約 570 萬',
+                religion: '基督教 (主體)',
+                language: '英語 (官方語)',
+                currency: '賴比瑞亞元 (LRD)'
+            },
+            'Mauritania': {
+                population: '約 500 萬',
+                religion: '伊斯蘭教 (主體)',
+                language: '阿拉伯語 (官方語)',
+                currency: '茅利塔尼亞烏吉亞 (MRU)'
+            },
+            'Central African Republic': {
+                population: '約 630 萬',
+                religion: '基督教、傳統信仰',
+                language: '法語、桑戈語 (官方語)',
+                currency: '中非金融合作法郎 (XAF)'
+            },
+            'Namibia': {
+                population: '約 310 萬',
+                religion: '基督教 (主體)',
+                language: '英語 (官方語)',
+                currency: '納米比亞元 (NAD)'
+            },
+            'Botswana': {
+                population: '約 280 萬',
+                religion: '基督教、傳統信仰',
+                language: '英語 (官方語)、茨瓦納語',
+                currency: '波札那普拉 (BWP)'
+            },
+            'Gambia': {
+                population: '約 300 萬',
+                religion: '伊斯蘭教 (主體)',
+                language: '英語 (官方語)',
+                currency: '甘比亞達拉西 (GMD)'
+            },
+            'Gabon': {
+                population: '約 260 萬',
+                religion: '基督教 (主體)',
+                language: '法語 (官方語)',
+                currency: '中非金融合作法郎 (XAF)'
+            },
+            'Guinea': {
+                population: '約 1450 萬',
+                religion: '伊斯蘭教 (主體)',
+                language: '法語 (官方語)',
+                currency: '幾內亞法郎 (GNF)'
+            },
+            'Equatorial Guinea': {
+                population: '約 180 萬',
+                religion: '天主教',
+                language: '西班牙語、法語、葡萄牙語 (官方語)',
+                currency: '中非金融合作法郎 (XAF)'
+            },
+            'Lesotho': {
+                population: '約 230 萬',
+                religion: '基督教 (主體)',
+                language: '塞索托語、英語 (官方語)',
+                currency: '賴索托洛蒂 (LSL)',
+            },
+            'Western Sahara': { // 注意：此為爭議地區，數據可能不完整或不一
+                population: '約 67 萬',
+                religion: '伊斯蘭教',
+                language: '阿拉伯語',
+                currency: '摩洛哥迪拉姆 (MAD) / 阿爾及利亞第納爾 (DZD)',
+            },
+            'Djibouti': {
+                population: '約 115 萬',
+                religion: '伊斯蘭教 (主體)',
+                language: '法語、阿拉伯語 (官方語)',
+                currency: '吉布地法郎 (DJF)'
+            },
+            'Guinea-Bissau': {
+                population: '約 220 萬',
+                religion: '傳統信仰、伊斯蘭教',
+                language: '葡萄牙語 (官方語)',
+                currency: '西非金融合作法郎 (XOF)'
+            },
+            'Poland': {
+                population: '約 3780 萬',
+                religion: '天主教 (主體)',
+                language: '波蘭語',
+                currency: '波蘭茲羅提 (PLN)'
+            },
+            'Romania': {
+                population: '約 1900 萬',
+                religion: '羅馬尼亞正教',
+                language: '羅馬尼亞語',
+                currency: '羅馬尼亞列伊 (RON)'
+            },
+            'Netherlands': {
+                population: '約 1790 萬',
+                religion: '無宗教信仰、天主教、新教',
+                language: '荷蘭語',
+                currency: '歐元 (EUR)'
+            },
+            'Belgium': {
+                population: '約 1190 萬',
+                religion: '天主教 (主體)',
+                language: '荷蘭語、法語、德語 (官方語)',
+                currency: '歐元 (EUR)'
+            },
+            'Greece': {
+                population: '約 1040 萬',
+                religion: '希臘正教',
+                language: '希臘語',
+                currency: '歐元 (EUR)'
+            },
+            'Portugal': {
+                population: '約 1030 萬',
+                religion: '天主教',
+                language: '葡萄牙語',
+                currency: '歐元 (EUR)'
+            },
+            'Czech Republic': {
+                population: '約 1060 萬',
+                religion: '無宗教信仰 (主體)',
+                language: '捷克語',
+                currency: '捷克克朗 (CZK)'
+            },
+            'Hungary': {
+                population: '約 960 萬',
+                religion: '天主教、新教',
+                language: '匈牙利語',
+                currency: '匈牙利福林 (HUF)'
+            },
+            'Sweden': {
+                population: '約 1060 萬',
+                religion: '無宗教信仰、路德宗 (傳統主體)',
+                language: '瑞典語',
+                currency: '瑞典克朗 (SEK)'
+            },
+            'Austria': {
+                population: '約 910 萬',
+                religion: '天主教 (主體)',
+                language: '德語',
+                currency: '歐元 (EUR)'
+            },
+            'Belarus': {
+                population: '約 920 萬',
+                religion: '東正教 (主體)',
+                language: '白俄羅斯語、俄語 (官方語)',
+                currency: '白俄羅斯盧布 (BYN)'
+            },
+            'Bulgaria': {
+                population: '約 670 萬',
+                religion: '保加利亞正教',
+                language: '保加利亞語',
+                currency: '保加利亞列弗 (BGN)'
+            },
+            'Serbia': {
+                population: '約 670 萬',
+                religion: '塞爾維亞正教',
+                language: '塞爾維亞語',
+                currency: '塞爾維亞第納爾 (RSD)'
+            },
+            'Switzerland': {
+                population: '約 890 萬',
+                religion: '天主教、新教',
+                language: '德語、法語、義大利語、羅曼什語 (官方語)',
+                currency: '瑞士法郎 (CHF)'
+            },
+            'Denmark': {
+                population: '約 590 萬',
+                religion: '丹麥福音路德宗 (國教)',
+                language: '丹麥語',
+                currency: '丹麥克朗 (DKK)'
+            },
+            'Slovakia': {
+                population: '約 580 萬',
+                religion: '天主教 (主體)',
+                language: '斯洛伐克語',
+                currency: '歐元 (EUR)'
+            },
+            'Finland': {
+                population: '約 560 萬',
+                religion: '芬蘭福音路德宗 (國教)',
+                language: '芬蘭語、瑞典語 (官方語)',
+                currency: '歐元 (EUR)'
+            },
+            'Norway': {
+                population: '約 560 萬',
+                religion: '路德宗 (傳統主體)',
+                language: '挪威語',
+                currency: '挪威克朗 (NOK)'
+            },
+            'Ireland': {
+                population: '約 520 萬',
+                religion: '天主教 (主體)',
+                language: '愛爾蘭語、英語 (官方語)',
+                currency: '歐元 (EUR)'
+            },
+            'Croatia': {
+                population: '約 400 萬',
+                religion: '天主教 (主體)',
+                language: '克羅埃西亞語',
+                currency: '歐元 (EUR)'
+            },
+            'Bosnia and Herzegovina': {
+                population: '約 320 萬',
+                religion: '伊斯蘭教、塞爾維亞正教、天主教',
+                language: '波士尼亞語、克羅埃西亞語、塞爾維亞語',
+                currency: '波士尼亞與赫塞哥維納可兌換馬克 (BAM)'
+            },
+            'Lithuania': {
+                population: '約 280 萬',
+                religion: '天主教 (主體)',
+                language: '立陶宛語',
+                currency: '歐元 (EUR)'
+            },
+            'Slovenia': {
+                population: '約 210 萬',
+                religion: '天主教 (主體)',
+                language: '斯洛維尼亞語',
+                currency: '歐元 (EUR)'
+            },
+            'Latvia': {
+                population: '約 180 萬',
+                religion: '路德宗、天主教',
+                language: '拉脫維亞語',
+                currency: '歐元 (EUR)'
+            },
+            'Estonia': {
+                population: '約 140 萬',
+                religion: '無宗教信仰、路德宗',
+                language: '愛沙尼亞語',
+                currency: '歐元 (EUR)'
+            },
+            'Moldova': {
+                population: '約 250 萬',
+                religion: '摩爾多瓦正教 (主體)',
+                language: '羅馬尼亞語 (官方語)',
+                currency: '摩爾多瓦列伊 (MDL)'
+            },
+            'Albania': {
+                population: '約 270 萬',
+                religion: '伊斯蘭教、基督教',
+                language: '阿爾巴尼亞語',
+                currency: '阿爾巴尼亞列克 (ALL)'
+            },
+            'North Macedonia': {
+                population: '約 205 萬',
+                religion: '馬其頓正教、伊斯蘭教',
+                language: '馬其頓語',
+                currency: '馬其頓代納爾 (MKD)'
+            },
+            'Montenegro': {
+                population: '約 62 萬',
+                religion: '東正教 (主體)',
+                language: '黑山語 (塞爾維亞語)',
+                currency: '歐元 (EUR)'
+            },
+            'Iceland': {
+                population: '約 39 萬',
+                religion: '冰島福音路德宗 (國教)',
+                language: '冰島語',
+                currency: '冰島克朗 (ISK)'
+            },
+            'Cyprus': {
+                population: '約 130 萬',
+                religion: '希臘正教、伊斯蘭教',
+                language: '希臘語、土耳其語 (官方語)',
+                currency: '歐元 (EUR)',
+            },
+            'Colombia': {
+                population: '約 5350 萬',
+                religion: '天主教',
+                language: '西班牙語',
+                currency: '哥倫比亞比索 (COP)'
+            },
+            'Peru': {
+                population: '約 3450 萬',
+                religion: '天主教',
+                language: '西班牙語、克丘亞語',
+                currency: '秘魯索爾 (PEN)'
+            },
+            'Venezuela': {
+                population: '約 3000 萬',
+                religion: '天主教',
+                language: '西班牙語',
+                currency: '玻利瓦爾 (VES)'
+            },
+            'Chile': {
+                population: '約 1950 萬',
+                religion: '天主教',
+                language: '西班牙語',
+                currency: '智利比索 (CLP)'
+            },
+            'Ecuador': {
+                population: '約 1850 萬',
+                religion: '天主教',
+                language: '西班牙語',
+                currency: '美元 (USD)'
+            },
+            'Bolivia': {
+                population: '約 1250 萬',
+                religion: '天主教',
+                language: '西班牙語、克丘亞語、艾馬拉語 (官方語)',
+                currency: '玻利維亞諾 (BOB)'
+            },
+            'Paraguay': {
+                population: '約 690 萬',
+                religion: '天主教',
+                language: '西班牙語、瓜拉尼語 (官方語)',
+                currency: '巴拉圭瓜拉尼 (PYG)'
+            },
+            'Uruguay': {
+                population: '約 340 萬',
+                religion: '無宗教信仰 (主體)、天主教',
+                language: '西班牙語',
+                currency: '烏拉圭比索 (UYU)'
+            },
+            'Guyana': {
+                population: '約 81 萬',
+                religion: '基督教、印度教',
+                language: '英語 (官方語)',
+                currency: '蓋亞那元 (GYD)'
+            },
+            'Suriname': {
+                population: '約 63 萬',
+                religion: '基督教、印度教、伊斯蘭教',
+                language: '荷蘭語 (官方語)',
+                currency: '蘇利南元 (SRD)'
+            },
+            'Panama': {
+                population: '約 460 萬',
+                religion: '天主教 (主體)',
+                language: '西班牙語',
+                currency: '巴拿馬巴波亞 (PAB), 美元 (USD)',
+            },
+            'Costa Rica': {
+                population: '約 540 萬',
+                religion: '天主教 (國教)',
+                language: '西班牙語',
+                currency: '哥斯大黎加科朗 (CRC)'
+            },
+            'Nicaragua': {
+                population: '約 720 萬',
+                religion: '天主教 (主體)',
+                language: '西班牙語',
+                currency: '尼加拉瓜科多巴 (NIO)'
+            },
+            'Honduras': {
+                population: '約 1080 萬',
+                religion: '天主教 (主體)',
+                language: '西班牙語',
+                currency: '宏都拉斯倫皮拉 (HNL)'
+            },
+            'El Salvador': {
+                population: '約 670 萬',
+                religion: '天主教 (主體)',
+                language: '西班牙語',
+                currency: '美元 (USD)',
+            },
+            'Guatemala': {
+                population: '約 1950 萬',
+                religion: '天主教、新教',
+                language: '西班牙語',
+                currency: '瓜地馬拉格查爾 (GTQ)'
+            },
+            'Belize': {
+                population: '約 45 萬',
+                religion: '天主教、新教',
+                language: '英語 (官方語)',
+                currency: '貝里斯元 (BZD)'
+            },
+            'Cuba': {
+                population: '約 1110 萬',
+                religion: '天主教、無宗教信仰',
+                language: '西班牙語',
+                currency: '古巴比索 (CUP)',
+            },
+            'Haiti': {
+                population: '約 1190 萬',
+                religion: '天主教、巫毒教 (官方宗教)',
+                language: '法語、海地克里奧爾語 (官方語)',
+                currency: '海地古德 (HTG)'
+            },
+            'Dominican Republic': {
+                population: '約 1150 萬',
+                religion: '天主教 (主體)',
+                language: '西班牙語',
+                currency: '多明尼加比索 (DOP)'
+            },
+            'Jamaica': {
+                population: '約 280 萬',
+                religion: '基督教 (主體)',
+                language: '英語 (官方語)',
+                currency: '牙買加元 (JMD)'
+            },
+            'Iraq': {
+                population: '約 4650 萬',
+                religion: '伊斯蘭教 (什葉派、遜尼派)',
+                language: '阿拉伯語、庫德語 (官方語)',
+                currency: '伊拉克第納爾 (IQD)'
+            },
+            'Syria': {
+                population: '約 2500 萬',
+                religion: '伊斯蘭教 (遜尼派、什葉派)',
+                language: '阿拉伯語 (官方語)',
+                currency: '敘利亞鎊 (SYP)'
+            },
+            'Jordan': {
+                population: '約 1150 萬',
+                religion: '伊斯蘭教 (遜尼派)',
+                language: '阿拉伯語 (官方語)',
+                currency: '約旦第納爾 (JOD)'
+            },
+            'Lebanon': {
+                population: '約 540 萬',
+                religion: '伊斯蘭教、基督教 (多教派)',
+                language: '阿拉伯語 (官方語)、法語',
+                currency: '黎巴嫩鎊 (LBP)'
+            },
+            'Israel': {
+                population: '約 990 萬',
+                religion: '猶太教 (主體)',
+                language: '希伯來語、阿拉伯語 (官方語)',
+                currency: '以色列新謝克爾 (ILS)'
+            },
+            'Palestine': { // 註：指巴勒斯坦地區
+                population: '約 540 萬',
+                religion: '伊斯蘭教 (主體)',
+                language: '阿拉伯語',
+                currency: '以色列新謝克爾 (ILS), 約旦第納爾 (JOD)',
+            },
+            'Yemen': {
+                population: '約 3650 萬',
+                religion: '伊斯蘭教 (遜尼派、什葉派)',
+                language: '阿拉伯語 (官方語)',
+                currency: '葉門里亞爾 (YER)'
+            },
+            'Oman': {
+                population: '約 500 萬',
+                religion: '伊斯蘭教 (伊巴德派、遜尼派)',
+                language: '阿拉伯語 (官方語)',
+                currency: '阿曼里亞爾 (OMR)'
+            },
+            'United Arab Emirates': {
+                population: '約 950 萬',
+                religion: '伊斯蘭教 (主體)',
+                language: '阿拉伯語 (官方語)',
+                currency: '阿聯酋迪拉姆 (AED)'
+            },
+            'Qatar': {
+                population: '約 290 萬',
+                religion: '伊斯蘭教 (主體)',
+                language: '阿拉伯語 (官方語)',
+                currency: '卡達里亞爾 (QAR)'
+            },
+            'Kuwait': {
+                population: '約 440 萬',
+                religion: '伊斯蘭教 (主體)',
+                language: '阿拉伯語 (官方語)',
+                currency: '科威特第納爾 (KWD)'
+            },
+            'Afghanistan': {
+                population: '約 4300 萬',
+                religion: '伊斯蘭教 (主體)',
+                language: '普什圖語、達里語 (官方語)',
+                currency: '阿富汗尼 (AFN)'
+            },
+            'Uzbekistan': {
+                population: '約 3700 萬',
+                religion: '伊斯蘭教 (遜尼派)',
+                language: '烏茲別克語 (官方語)',
+                currency: '烏茲別克索姆 (UZS)'
+            },
+            'Kazakhstan': {
+                population: '約 2000 萬',
+                religion: '伊斯蘭教、東正教',
+                language: '哈薩克語、俄語 (官方語)',
+                currency: '哈薩克堅戈 (KZT)'
+            },
+            'Turkmenistan': {
+                population: '約 720 萬',
+                religion: '伊斯蘭教 (主體)',
+                language: '土庫曼語 (官方語)',
+                currency: '土庫曼馬納特 (TMT)'
+            },
+            'Tajikistan': {
+                population: '約 1050 萬',
+                religion: '伊斯蘭教 (主體)',
+                language: '塔吉克語 (官方語)',
+                currency: '塔吉克索莫尼 (TJS)'
+            },
+            'Kyrgyzstan': {
+                population: '約 720 萬',
+                religion: '伊斯蘭教 (主體)',
+                language: '吉爾吉斯語、俄語 (官方語)',
+                currency: '吉爾吉斯索姆 (KGS)'
+            },
+            'Nepal': {
+                population: '約 3100 萬',
+                religion: '印度教、佛教',
+                language: '尼泊爾語 (官方語)',
+                currency: '尼泊爾盧比 (NPR)'
+            },
+            'Bhutan': {
+                population: '約 80 萬',
+                religion: '藏傳佛教 (國教)',
+                language: '宗卡語 (官方語)',
+                currency: '不丹努爾特魯姆 (BTN)',
+            },
+            'Sri Lanka': {
+                population: '約 2250 萬',
+                religion: '佛教 (主體)',
+                language: '僧伽羅語、坦米爾語 (官方語)',
+                currency: '斯里蘭卡盧比 (LKR)'
+            },
+            'Myanmar': {
+                population: '約 5450 萬',
+                religion: '佛教 (上座部佛教)',
+                language: '緬甸語 (官方語)',
+                currency: '緬元 (MMK)'
+            },
+            'Laos': {
+                population: '約 780 萬',
+                religion: '佛教 (上座部佛教)',
+                language: '寮語 (官方語)',
+                currency: '寮國基普 (LAK)'
+            },
+            'Cambodia': {
+                population: '約 1750 萬',
+                religion: '佛教 (上座部佛教)',
+                language: '高棉語 (官方語)',
+                currency: '柬埔寨瑞爾 (KHR)',
+            },
+            'Singapore': {
+                population: '約 610 萬',
+                religion: '佛教、基督教、伊斯蘭教',
+                language: '英語、馬來語、華語、坦米爾語 (官方語)',
+                currency: '新加坡元 (SGD)'
+            },
+            'Brunei': {
+                population: '約 46 萬',
+                religion: '伊斯蘭教 (官方宗教)',
+                language: '馬來語 (官方語)',
+                currency: '汶萊元 (BND)',
+            },
+            'East Timor': {
+                population: '約 140 萬',
+                religion: '天主教 (主體)',
+                language: '德頓語、葡萄牙語 (官方語)',
+                currency: '美元 (USD)',
+            },
+            'Papua New Guinea': {
+                population: '約 1080 萬',
+                religion: '基督教 (主體)',
+                language: '英語 (官方語)、皮欽語、希里摩圖語',
+                currency: '巴布亞紐幾內亞基那 (PGK)'
+            },
+            'New Zealand': {
+                population: '約 540 萬',
+                religion: '基督教、無宗教信仰',
+                language: '英語、毛利語、紐西蘭手語 (官方語)',
+                currency: '紐西蘭元 (NZD)'
+            },
+            'Mongolia': {
+                population: '約 350 萬',
+                religion: '藏傳佛教、薩滿教',
+                language: '蒙古語',
+                currency: '蒙古圖格里克 (MNT)'
+            },
+            'North Korea': {
+                population: '約 2620 萬',
+                religion: '無官方宗教 (主體)、佛教、傳統信仰',
+                language: '韓語',
+                currency: '北韓圓 (KPW)'
+            },
+            'Taiwan': {
+                population: '約 2340 萬',
+                religion: '佛教、道教、民間信仰、基督教',
+                language: '國語 (官方語)',
+                currency: '新臺幣 (TWD)'
+            },
+            'Georgia': {
+                population: '約 370 萬',
+                religion: '喬治亞正教 (主體)',
+                language: '喬治亞語 (官方語)',
+                currency: '喬治亞拉里 (GEL)'
+            },
+            'Armenia': {
+                population: '約 300 萬',
+                religion: '亞美尼亞使徒教會 (國教)',
+                language: '亞美尼亞語 (官方語)',
+                currency: '亞美尼亞德拉姆 (AMD)'
+            },
+            'Azerbaijan': {
+                population: '約 1050 萬',
+                religion: '伊斯蘭教 (什葉派主體)',
+                language: '亞塞拜然語 (官方語)',
+                currency: '亞塞拜然馬納特 (AZN)'
+            },
+            'Ukraine': {
+                population: '約 3800 萬', // 註：受戰爭影響，此為波動數據
+                religion: '東正教 (主體)',
+                language: '烏克蘭語 (官方語)',
+                currency: '烏克蘭格里夫納 (UAH)'
+            },
+            'Korea, Republic of': {
+                population: '約 5178 萬',
+                religion: '基督新教、佛教、天主教等',
+                language: '韓語（標準語）、韓國手語',
+                currency: '韓圓（₩）（KRW）'
+            },
+            'Korea (Democratic People\'s Republic of)': {
+                population: '約 2599 萬',
+                religion: '朝鮮巫教、天道教',
+                language: '朝鮮語（文化語）',
+                currency: '朝鮮圓（₩）（KPW）'
+            },
+            'Maldives': {
+                population: '約 52 萬',
+                religion: '伊斯蘭教（近 100%）',
+                language: '迪維希語',
+                currency: '	拉菲亞（MVR）'
+            },
+        };
+
         var learnMap;
         var geoJsonLayer;
         var highlightLayer = null;
@@ -531,6 +1520,9 @@
             const flagSrc = data.iso2 && data.iso2 !== 'null' ? `${FLAG_URL_BASE}${data.iso2.toLowerCase()}.png` : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; // 佔位透明圖
             const flagHTML = data.iso2 && data.iso2 !== 'null' ? `<img src="${flagSrc}" alt="${data.name} 國旗" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABGAQMAAACOVq65AAAABlBMVEXKysq+vr6o4r+oAAAAAWJLR0QAiAUdSAAAAAlwSFlzAAAuIwAALiMBePzC6AAAAAd0SU1FB+cGEAIwA82+g5cAAABTSURBVDjL7c9BCoAwEATQv7t3B38J0S/eQvB9iC36o7gHhE2y9Jj779U2S0oM05d691r03UfI70f9r0rVfXfA43t63Y15O6CNA/o3gQMA+x/79z9dBAAAAC9JREFUeNpjYBgFo6AUjIKhA/00A4xXkAGk48R8P47jT5yPAgAwB+z+Hw+JAAAAAElFTkSuQmCC';">` : '無國旗預覽';
             
+            // 檢查是否有額外資訊
+            const extraInfo = extraCountryInfo[data.nameEn];
+            
             infoPanel.innerHTML = `
                 <h3>${data.name}</h3>
                 <div class="flag-container">
@@ -568,7 +1560,30 @@
                     <strong>所屬地區:</strong>
                     ${data.regions ? data.regions.join(', ') : '無'}
                 </div>
-                <p style="margin-top: 15px; font-style: italic; color: #777;">*此為基礎數據，人口、宗教等詳細資訊需額外數據庫支援。</p>
+                
+                ${extraInfo ? `
+                <div class="extra-info-section">
+                    <h4>其他資訊</h4>
+                    <div class="info-item">
+                        <strong>人口:</strong>
+                        ${extraInfo.population}
+                    </div>
+                    <div class="info-item">
+                        <strong>主要宗教:</strong>
+                        ${extraInfo.religion}
+                    </div>
+                    <div class="info-item">
+                        <strong>語言:</strong>
+                        ${extraInfo.language}
+                    </div>
+                    <div class="info-item">
+                        <strong>貨幣:</strong>
+                        ${extraInfo.currency}
+                    </div>
+                </div>
+                ` : ''}
+                
+                <p style="margin-top: 15px; font-style: italic; color: #777;">${extraInfo ? '*此為基礎數據，更詳細資訊需額外數據庫支援。' : '*此為基礎數據，人口、宗教等詳細資訊需額外數據庫支援。'}</p>
             `;
         }
 
