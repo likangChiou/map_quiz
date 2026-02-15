@@ -634,8 +634,8 @@
             }
 
             // 2. 檢查輸入是否有效
-            if (isNaN(inputCount) || inputCount < 5 || inputCount > maxCount) {
-                alert('請輸入 5 到 ' + maxCount + ' 之間的有效題數！');
+            if (isNaN(inputCount) || inputCount < 3 || inputCount > maxCount) {
+                alert('請輸入 3 到 ' + maxCount + ' 之間的有效題數！');
                 document.getElementById('questionCount').value = Math.min(20, maxCount);
                 return;
             }
@@ -837,4 +837,5 @@
         }
     </script>
 </body>
+
 </html>
