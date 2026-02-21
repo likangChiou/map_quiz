@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +11,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -20,20 +21,20 @@
             justify-content: center;
             padding: 20px;
         }
-        
+
         .container {
             max-width: 800px;
             width: 100%;
             text-align: center;
         }
-        
+
         .home-screen {
             background: white;
             border-radius: 20px;
             padding: 50px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
-        
+
         .home-screen h1 {
             font-size: 3em;
             color: #333;
@@ -48,14 +49,14 @@
             font-size: 1.2em;
             margin-bottom: 40px;
         }
-        
+
         .mode-links {
             display: flex;
             gap: 20px;
             justify-content: center;
             flex-wrap: wrap;
         }
-        
+
         .mode-link {
             text-decoration: none;
             flex: 1;
@@ -75,7 +76,7 @@
             font-weight: 600;
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
-        
+
         .btn:hover {
             background: #5568d3;
             transform: translateY(-3px);
@@ -83,22 +84,32 @@
         }
 
         .btn.learn {
-            background: #28a745; /* 綠色，區別於遊戲模式 */
+            background: #28a745;
+            /* 綠色，區別於遊戲模式 */
         }
 
         .btn.learn:hover {
             background: #218838;
         }
-        
+
+        .btn.flag {
+            background: #ff6b35;
+            /* 橙色，國旗模式 */
+        }
+
+        .btn.flag:hover {
+            background: #e55a2b;
+        }
+
         @media (max-width: 600px) {
             .home-screen {
                 padding: 30px;
             }
-            
+
             .home-screen h1 {
                 font-size: 2.2em;
             }
-            
+
             .mode-links {
                 flex-direction: column;
             }
@@ -109,12 +120,13 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="home-screen">
             <h1>世界地圖挑戰站</h1>
             <p>請選擇您想要進行的模式：</p>
-            
+
             <div class="mode-links">
                 <a href="map_2.html" class="mode-link">
                     <button class="btn">
@@ -122,15 +134,23 @@
                         <div style="font-size: 0.6em; font-weight: 400; margin-top: 5px;">（測驗您的記憶與反應）</div>
                     </button>
                 </a>
-                
+
                 <a href="learn_map.html" class="mode-link">
                     <button class="btn learn">
                         📚 學習模式
                         <div style="font-size: 0.6em; font-weight: 400; margin-top: 5px;">（探索地圖，熟悉國家位置）</div>
                     </button>
                 </a>
+
+                <a href="flag_quiz.html" class="mode-link">
+                    <button class="btn flag">
+                        🏳️ 國旗模式
+                        <div style="font-size: 0.6em; font-weight: 400; margin-top: 5px;">（看國旗猜國家）</div>
+                    </button>
+                </a>
             </div>
         </div>
     </div>
 </body>
+
 </html>
